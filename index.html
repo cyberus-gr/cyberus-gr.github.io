@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyberus Security Project — Open Security Research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Epilogue:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#07090f; --bg2:#0c1018; --surface:#111722; --surface2:#161e2e;
+  --border:rgba(99,179,237,0.1); --border2:rgba(99,179,237,0.2);
+  --accent:#63b3ed; --accent2:#f6ad55; --green:#68d391; --red:#fc8181;
+  --text:#a8bfd4; --text2:#637d97; --white:#e8f1f8;
+  --font-mono:'IBM Plex Mono',monospace; --font-disp:'Epilogue',sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-mono);font-size:13px;line-height:1.8;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.5;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(7,9,15,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-brand{font-family:var(--font-disp);font-weight:900;font-size:17px;letter-spacing:-.04em;color:var(--white);text-decoration:none;}
+.nav-brand em{color:var(--accent);font-style:normal;}
+
+.nav-logo-img{width:28px;height:28px;object-fit:contain;border-radius:4px;border:1px solid rgba(99,179,237,0.25);background:rgba(0,10,25,0.8);margin-right:6px;flex-shrink:0;}
+.nav-tagline{font-family:var(--font-mono);font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--text2);font-weight:400;margin-left:4px;align-self:flex-end;padding-bottom:1px;}
+.nav-brand{display:flex;align-items:center;}
+
+.nav-links{display:flex;gap:0;list-style:none;}
+.nav-links a{display:block;padding:0 18px;height:56px;line-height:56px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text2);text-decoration:none;border-right:1px solid var(--border);transition:color .15s,background .15s;}
+.nav-links li:first-child a{border-left:1px solid var(--border);}
+.nav-links a:hover{color:var(--white);background:rgba(99,179,237,0.04);}
+.nav-gh{display:flex;align-items:center;gap:7px;padding:7px 14px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);text-decoration:none;border:1px solid var(--border2);border-radius:2px;transition:background .15s,box-shadow .15s;font-family:var(--font-mono);}
+.nav-gh:hover{background:rgba(99,179,237,0.07);box-shadow:0 0 24px rgba(99,179,237,0.2);}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:80px 48px 60px;position:relative;overflow:hidden;}
+.hero-bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(99,179,237,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,179,237,0.03) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 90% 90% at 50% 40%,black 20%,transparent 80%);}
+.hero-orb{position:absolute;width:700px;height:700px;background:radial-gradient(circle,rgba(99,179,237,0.05) 0%,transparent 65%);top:50%;left:45%;transform:translate(-50%,-50%);pointer-events:none;}
+.hero-orb2{position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(246,173,85,0.06) 0%,transparent 70%);bottom:15%;right:8%;pointer-events:none;}
+
+.hero-eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:22px;display:flex;align-items:center;gap:10px;opacity:0;animation:fadeUp .5s ease forwards .1s;}
+.hero-eyebrow::before{content:'';width:28px;height:1px;background:var(--accent);}
+
+.hero-h1{font-family:var(--font-disp);font-weight:900;font-size:clamp(58px,9vw,120px);line-height:.92;letter-spacing:-.05em;color:var(--white);margin-bottom:10px;opacity:0;animation:fadeUp .5s ease forwards .2s;}
+.hero-h1 .a{color:var(--accent);}
+.hero-h1 .d{color:var(--text2);font-weight:300;}
+
+.hero-sub{font-family:var(--font-disp);font-weight:300;font-size:clamp(15px,2vw,22px);color:var(--text2);margin-bottom:44px;opacity:0;animation:fadeUp .5s ease forwards .3s;}
+
+/* TERMINAL */
+.terminal{background:var(--surface);border:1px solid var(--border);border-radius:3px;max-width:580px;opacity:0;animation:fadeUp .5s ease forwards .4s;box-shadow:0 0 40px rgba(99,179,237,0.08);}
+.term-bar{display:flex;align-items:center;gap:6px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg2);}
+.td{width:9px;height:9px;border-radius:50%;}
+.td:nth-child(1){background:#fc8181;} .td:nth-child(2){background:#f6ad55;} .td:nth-child(3){background:#68d391;}
+.term-title{margin-left:8px;font-size:10px;color:var(--text2);letter-spacing:.06em;}
+.term-body{padding:20px 22px;font-size:12px;line-height:2.1;}
+.tp{color:var(--accent);}
+.tc{color:var(--white);}
+.to{color:var(--text2);}
+.to b{color:var(--text);}
+.cursor{display:inline-block;width:7px;height:13px;background:var(--accent);vertical-align:middle;margin-left:2px;animation:blink 1s step-end infinite;}
+
+/* HERO CTA */
+.hero-cta{display:flex;gap:14px;margin-top:36px;flex-wrap:wrap;opacity:0;animation:fadeUp .5s ease forwards .5s;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:11px 26px;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;border-radius:2px;transition:all .18s;cursor:pointer;border:none;}
+.btn-primary{background:var(--accent);color:#000;font-weight:600;}
+.btn-primary:hover{background:var(--white);box-shadow:0 0 32px rgba(99,179,237,0.4);transform:translateY(-2px);}
+.btn-ghost{background:transparent;color:var(--accent);border:1px solid var(--border2);}
+.btn-ghost:hover{background:rgba(99,179,237,0.06);box-shadow:0 0 24px rgba(99,179,237,0.15);transform:translateY(-2px);}
+
+/* SCROLL HINT */
+.scroll-hint{position:absolute;bottom:32px;left:48px;display:flex;align-items:center;gap:10px;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text2);opacity:0;animation:fadeUp .5s ease forwards .8s;}
+.scroll-line{width:40px;height:1px;background:var(--text2);}
+
+/* TICKER */
+.ticker-wrap{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);overflow:hidden;height:36px;display:flex;align-items:center;}
+.ticker-inner{display:flex;gap:0;white-space:nowrap;animation:ticker 22s linear infinite;}
+.ticker-item{padding:0 48px;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text2);border-right:1px solid var(--border);}
+.ticker-item span{color:var(--accent);margin-right:8px;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border);}
+.stat{padding:28px 40px;border-right:1px solid var(--border);}
+.stat:last-child{border-right:none;}
+.stat-n{font-family:var(--font-disp);font-weight:900;font-size:40px;letter-spacing:-.04em;color:var(--white);line-height:1;}
+.stat-n em{color:var(--accent);font-style:normal;}
+.stat-l{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text2);margin-top:6px;}
+
+/* FEATURED PROJECTS */
+.fp-section{padding:96px 48px;}
+.section-header{margin-bottom:52px;}
+.section-label{display:inline-flex;align-items:center;gap:10px;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
+.section-label::before{content:'//';opacity:.4;}
+.section-title{font-family:var(--font-disp);font-weight:900;font-size:clamp(28px,4vw,48px);line-height:1;letter-spacing:-.035em;color:var(--white);margin-bottom:12px;}
+.section-desc{color:var(--text2);font-size:13px;line-height:1.9;max-width:500px;}
+
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:3px;overflow:hidden;}
+.proj-card{background:var(--surface);padding:30px;position:relative;transition:background .15s;text-decoration:none;display:block;overflow:hidden;}
+.proj-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transform:scaleX(0);transform-origin:left;transition:transform .25s;}
+.proj-card:hover{background:var(--surface2);}
+.proj-card:hover::before{transform:scaleX(1);}
+.proj-icon{font-size:22px;margin-bottom:18px;display:block;}
+.proj-name{font-family:var(--font-disp);font-weight:700;font-size:17px;color:var(--white);margin-bottom:8px;letter-spacing:-.015em;}
+.proj-desc{color:var(--text2);font-size:12px;line-height:1.75;margin-bottom:18px;}
+.proj-tags{display:flex;flex-wrap:wrap;gap:5px;}
+.tag{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:2px;border:1px solid var(--border);color:var(--text2);}
+.tag-blue{border-color:rgba(99,179,237,.3);color:var(--accent);}
+.tag-amber{border-color:rgba(246,173,85,.3);color:var(--accent2);}
+.tag-green{border-color:rgba(104,211,145,.3);color:var(--green);}
+.proj-arrow{position:absolute;bottom:22px;right:22px;color:var(--text2);font-size:16px;transition:color .15s,transform .15s;}
+.proj-card:hover .proj-arrow{color:var(--accent);transform:translate(3px,-3px);}
+.proj-more{margin-top:1px;background:var(--bg2);border:none;padding:20px 30px;display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:var(--text2);font-size:11px;letter-spacing:.1em;text-transform:uppercase;transition:color .15s,background .15s;}
+.proj-more:hover{background:var(--surface);color:var(--accent);}
+
+/* BLOG PREVIEW */
+.blog-section{padding:96px 48px;background:var(--bg2);border-top:1px solid var(--border);}
+.blog-list{display:flex;flex-direction:column;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:3px;overflow:hidden;}
+.blog-row{display:grid;grid-template-columns:120px 1fr 120px;align-items:center;gap:24px;padding:22px 28px;background:var(--surface);text-decoration:none;transition:background .15s;border-bottom:1px solid var(--border);}
+.blog-row:last-child{border-bottom:none;}
+.blog-row:hover{background:var(--surface2);}
+.blog-cat{font-size:10px;letter-spacing:.15em;text-transform:uppercase;}
+.blog-cat.labs{color:var(--accent);}
+.blog-cat.tutorial{color:var(--green);}
+.blog-cat.research{color:var(--accent2);}
+.blog-cat.case{color:var(--red);}
+.blog-row-title{font-family:var(--font-disp);font-weight:700;font-size:15px;color:var(--white);letter-spacing:-.01em;}
+.blog-date{font-size:11px;color:var(--text2);text-align:right;}
+.blog-more{margin-top:1px;background:var(--bg2);border:none;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:var(--text2);font-size:11px;letter-spacing:.1em;text-transform:uppercase;transition:color .15s,background .15s;}
+.blog-more:hover{background:var(--surface);color:var(--accent);}
+
+/* ABOUT STRIP */
+.about-strip{padding:96px 48px;border-top:1px solid var(--border);}
+.about-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;}
+.about-body p{color:var(--text2);font-size:13px;line-height:1.95;margin-bottom:18px;}
+.about-body p b{color:var(--text);font-weight:400;}
+.about-body p .hl{color:var(--accent);}
+.team-list{display:flex;flex-direction:column;gap:12px;}
+.team-card{padding:20px 24px;border:1px solid var(--border);border-radius:3px;background:var(--bg2);transition:border-color .15s,box-shadow .15s;}
+.team-card:hover{border-color:var(--border2);box-shadow:0 0 24px rgba(99,179,237,0.1);}
+.team-name{font-family:var(--font-disp);font-weight:700;font-size:16px;color:var(--white);margin-bottom:4px;}
+.team-role{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.team-links{display:flex;gap:10px;flex-wrap:wrap;}
+.team-link{display:inline-flex;align-items:center;gap:5px;font-size:10px;letter-spacing:.08em;color:var(--text2);text-decoration:none;border:1px solid var(--border);padding:3px 10px;border-radius:2px;transition:color .15s,border-color .15s;}
+.team-link:hover{color:var(--accent);border-color:var(--border2);}
+
+/* NEWSLETTER CTA */
+.nl-strip{padding:60px 48px;background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.nl-inner{display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.nl-title{font-family:var(--font-disp);font-weight:900;font-size:22px;color:var(--white);letter-spacing:-.02em;margin-bottom:6px;}
+.nl-desc{font-size:12px;color:var(--text2);}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:36px 48px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px;}
+.footer-brand{font-family:var(--font-disp);font-weight:900;font-size:15px;letter-spacing:-.03em;color:var(--text2);text-decoration:none;}
+.footer-brand em{color:var(--accent);font-style:normal;}
+.footer-copy{font-size:11px;color:var(--text2);text-align:center;letter-spacing:.04em;}
+.footer-links{display:flex;gap:20px;justify-content:flex-end;list-style:none;}
+.footer-links a{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);text-decoration:none;transition:color .15s;}
+.footer-links a:hover{color:var(--accent);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+@media(max-width:768px){
+  nav{padding:0 20px;} .nav-links{display:none;}
+  .hero{padding:80px 20px 48px;}
+  .stats{grid-template-columns:1fr 1fr;}
+  .fp-section,.blog-section,.about-strip,.nl-strip{padding:60px 20px;}
+  .about-inner{grid-template-columns:1fr;}
+  .blog-row{grid-template-columns:1fr;gap:6px;}
+  .blog-date{display:none;}
+  footer{grid-template-columns:1fr;text-align:center;padding:28px 20px;}
+  .footer-links{justify-content:center;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand"><img src="data:image/png;base64,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" alt="Cyberus Security Project" class="nav-logo-img">CYBE<em>RUS</em></a>
+  <ul class="nav-links">
+    <li><a href="about.html">About</a></li>
+    <li><a href="projects.html">Projects</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="updates.html">Updates</a></li>
+  </ul>
+  <a href="https://github.com/cyberus-gr" target="_blank" class="nav-gh">
+    <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+    GitHub
+  </a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-orb"></div>
+  <div class="hero-orb2"></div>
+
+  
+  <div class="hero-eyebrow">Cyberus // Athens, Greece</div>
+
+  <h1 class="hero-h1">
+    CYBE<span class="a">RUS</span><br>
+    <span class="d">SECURITY</span>
+  </h1>
+  <p class="hero-sub">Tools, research &amp; ideas — built in the open.</p>
+
+  <div class="terminal">
+    <div class="term-bar">
+      <div class="td"></div><div class="td"></div><div class="td"></div>
+      <span class="term-title">cyberus@gr — bash</span>
+    </div>
+    <div class="term-body">
+      <div><span class="tp">~$</span> <span class="tc">cat about.txt</span></div>
+      <div class="to">Independent security research by <b>Ailina S.</b> &amp; <b>Michael C.</b></div>
+      <div class="to">Cloud security · Security analysis · AI in cybersecurity</div>
+      <div style="margin-top:6px"><span class="tp">~$</span> <span class="tc">ls ./projects</span></div>
+      <div class="to">integrity-checker &nbsp; malware-scanner &nbsp; [more coming]</div>
+      <div style="margin-top:6px"><span class="tp">~$</span> <span class="tc">echo $slogan</span></div>
+      <div class="to" style="color:#63b3ed;font-style:italic;">Three layers. One guardian.<span class="cursor"></span></div>
+    </div>
+  </div>
+
+  <div class="hero-cta">
+    <a href="projects.html" class="btn btn-primary">▸ View Projects</a>
+    <a href="blog.html" class="btn btn-ghost">Read the Blog</a>
+    <a href="https://github.com/cyberus-gr" target="_blank" class="btn btn-ghost">GitHub ↗</a>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    Scroll to explore
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <div class="ticker-item"><span>●</span>Integrity Checker</div>
+    <div class="ticker-item"><span>●</span>Malware Scanner</div>
+    <div class="ticker-item"><span>●</span>AI Security Agent</div>
+    <div class="ticker-item"><span>●</span>Cloud Security Research</div>
+    <div class="ticker-item"><span>●</span>Open Source First</div>
+    <div class="ticker-item"><span>●</span>Athens, Greece</div>
+    <div class="ticker-item"><span>●</span>Integrity Checker</div>
+    <div class="ticker-item"><span>●</span>Malware Scanner</div>
+    <div class="ticker-item"><span>●</span>AI Security Agent</div>
+    <div class="ticker-item"><span>●</span>Cloud Security Research</div>
+    <div class="ticker-item"><span>●</span>Open Source First</div>
+    <div class="ticker-item"><span>●</span>Athens, Greece</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-n">04<em>+</em></div><div class="stat-l">Open Projects</div></div>
+  <div class="stat"><div class="stat-n">03</div><div class="stat-l">Active Research</div></div>
+  <div class="stat"><div class="stat-n">02</div><div class="stat-l">Researchers</div></div>
+  <div class="stat"><div class="stat-n">∞</div><div class="stat-l">Open Source</div></div>
+</div>
+
+<!-- ABOUT STRIP -->
+<section class="about-strip">
+  <div class="about-inner">
+    <div>
+      <div class="section-label">About Cyberus</div>
+      <h2 class="section-title">Who We Are</h2>
+      <div class="about-body">
+        <p>Cyberus is an <b>independent security research project</b> based in Greece — built by <span class="hl">Ailina S.</span> &amp; <span class="hl">Michael C.</span></p>
+        <p>We're not a company. We're researchers, builders, and learners who work on problems we find interesting: <span class="hl">cloud security</span>, <span class="hl">security analysis</span>, <span class="hl">AI in cybersecurity</span> and security tool development.</p>
+        <p>Everything we build is open and lives on GitHub. Our goal is to build useful things, document our process honestly, and share what we figure out — because <b>good security knowledge should be accessible to everyone.</b></p>
+        <p>Whether you're a fellow researcher, a hiring manager, or just curious — everything here is open to explore.</p>
+      </div>
+      <a href="about.html" class="btn btn-ghost" style="margin-top:8px;">Meet the team →</a>
+    </div>
+    <div class="team-list">
+      <div class="team-card">
+        <div class="team-name">Ailina S.</div>
+        <div class="team-role">Security Engineering</div>
+        <div class="team-links">
+          <a href="https://www.linkedin.com/in/ailina-sopileidi/" target="_blank" class="team-link">LinkedIn ↗</a>
+          <a href="https://github.com/ailinasopi" target="_blank" class="team-link">GitHub ↗</a>
+        </div>
+      </div>
+      <div class="team-card">
+        <div class="team-name">Michael C.</div>
+        <div class="team-role">Security Research</div>
+        <div class="team-links">
+          <a href="https://www.linkedin.com/in/michael-cappello/" target="_blank" class="team-link">LinkedIn ↗</a>
+          <a href="https://github.com/mmcyberus" target="_blank" class="team-link">GitHub ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED PROJECTS -->
+<section class="fp-section">
+  <div class="section-header">
+    <div class="section-label">Projects &amp; Tools</div>
+    <h2 class="section-title">What We've Built</h2>
+    <p class="section-desc">Open-source tools from real security problems. Free to use, fork, and improve.</p>
+  </div>
+
+  <div class="proj-grid">
+    <a href="projects.html#integrity" class="proj-card">
+      <span class="proj-icon">🔍</span>
+      <div class="proj-name">Integrity Checker</div>
+      <div class="proj-desc">File &amp; system integrity verification using hash validation. Monitors critical paths for unauthorized modifications.</div>
+      <div class="proj-tags">
+        <span class="tag tag-blue">Python</span>
+        <span class="tag tag-amber">Forensics</span>
+        <span class="tag">CLI</span>
+      </div>
+      <span class="proj-arrow">↗</span>
+    </a>
+    <a href="projects.html#malware" class="proj-card">
+      <span class="proj-icon">🦠</span>
+      <div class="proj-name">Malware Scanner</div>
+      <div class="proj-desc">Lightweight static &amp; behavioral malware detection with YARA rule support and updatable signature database.</div>
+      <div class="proj-tags">
+        <span class="tag tag-blue">YARA</span>
+        <span class="tag tag-amber">Detection</span>
+        <span class="tag">Python</span>
+      </div>
+      <span class="proj-arrow">↗</span>
+    </a>
+    <a href="projects.html" class="proj-card">
+      <span class="proj-icon">⚙️</span>
+      <div class="proj-name">More in Progress</div>
+      <div class="proj-desc">New tools are always being built. Watch the GitHub org for early releases and work-in-progress branches.</div>
+      <div class="proj-tags">
+        <span class="tag">WIP</span>
+        <span class="tag tag-green">Coming Soon</span>
+      </div>
+      <span class="proj-arrow">↗</span>
+    </a>
+  </div>
+  <a href="projects.html" class="proj-more">View all projects &amp; tools <span>→</span></a>
+</section>
+
+<!-- BLOG PREVIEW -->
+<section class="blog-section">
+  <div class="section-header">
+    <div class="section-label">Latest from the Blog</div>
+    <h2 class="section-title">Posts &amp; Writeups</h2>
+    <p class="section-desc">Labs, tutorials, research notes, and case studies — written as we build.</p>
+  </div>
+
+  <div class="blog-list">
+    <a href="blog.html#labs" class="blog-row">
+      <span class="blog-cat labs">Lab</span>
+      <span class="blog-row-title">Setting up a local malware analysis sandbox with FLARE-VM</span>
+      <span class="blog-date">Coming Soon</span>
+    </a>
+    <a href="blog.html#tutorials" class="blog-row">
+      <span class="blog-cat tutorial">Tutorial</span>
+      <span class="blog-row-title">Building a file integrity monitor with Python in under 100 lines</span>
+      <span class="blog-date">Coming Soon</span>
+    </a>
+    <a href="blog.html#research" class="blog-row">
+      <span class="blog-cat research">Research</span>
+      <span class="blog-row-title">AI agents for SOC triage: what actually works in 2025</span>
+      <span class="blog-date">Coming Soon</span>
+    </a>
+    <a href="blog.html#cases" class="blog-row">
+      <span class="blog-cat case">Case Study</span>
+      <span class="blog-row-title">Incident analysis: lateral movement via misconfigured cloud storage</span>
+      <span class="blog-date">Coming Soon</span>
+    </a>
+  </div>
+  <a href="blog.html" class="blog-more">Browse all posts <span>→</span></a>
+</section>
+
+
+
+<!-- NEWSLETTER CTA -->
+<div class="nl-strip">
+  <div class="nl-inner">
+    <div>
+      <div class="nl-title">Stay in the loop</div>
+      <div class="nl-desc">Vendor news, community updates, events and security advisories — curated by us.</div>
+    </div>
+    <a href="updates.html" class="btn btn-ghost">Browse Updates →</a>
+  </div>
+</div>
+
+<footer>
+  <a href="index.html" class="footer-brand"><img src="data:image/png;base64,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" alt="" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;margin-right:6px;">CYBE<em>RUS</em>.gr</a>
+  <div class="footer-copy">© 2025 Cyberus — Open Source Security Research, Athens GR</div>
+  <ul class="footer-links">
+    <li><a href="about.html">About</a></li>
+    <li><a href="projects.html">Projects</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="https://github.com/cyberus-gr" target="_blank">GitHub</a></li>
+  </ul>
+</footer>
+
+</body>
+</html>
