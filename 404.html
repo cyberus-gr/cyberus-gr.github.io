@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cyberus — Redirecting</title>
+<script>
+  // Clean URL redirect for GitHub Pages
+  // Converts /about → /about.html, /blog → /blog.html etc.
+  (function() {
+    var path = window.location.pathname;
+    var pages = ['about','projects','blog','updates'];
+    // Strip leading slash and trailing slash
+    var clean = path.replace(/^\/+|\/+$/g,'');
+    if (pages.indexOf(clean) !== -1) {
+      window.location.replace('/' + clean + '.html');
+    } else if (clean === '' || clean === 'index') {
+      window.location.replace('/index.html');
+    } else {
+      // genuine 404 — show message
+      document.getElementById('msg').style.display = 'block';
+    }
+  })();
+</script>
+<style>
+  body{margin:0;background:#07090f;color:#a8bfd4;font-family:'IBM Plex Mono',monospace;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;}
+  #msg{display:none;}
+  h1{font-size:80px;color:#63b3ed;margin:0;font-family:sans-serif;font-weight:900;}
+  p{color:#637d97;font-size:14px;margin:16px 0 32px;}
+  a{color:#63b3ed;text-decoration:none;border:1px solid rgba(99,179,237,0.3);padding:10px 24px;border-radius:2px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;}
+  a:hover{background:rgba(99,179,237,0.08);}
+</style>
+</head>
+<body>
+<div id="msg">
+  <h1>404</h1>
+  <p>This page doesn't exist — yet.</p>
+  <a href="/">← Back to Cyberus</a>
+</div>
+</body>
+</html>
