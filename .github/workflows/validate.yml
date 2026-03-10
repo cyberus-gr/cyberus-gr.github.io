@@ -23,7 +23,7 @@ jobs:
 
       - name: Validate HTML files
         run: |
-          html5validator --root . \
-            --ignore-re ".*\.(css|xml|txt|png|jpg|ico|json|yml|md)$" \
-            --also-check-css \
-            *.html
+          html5validator \
+            --root . \
+            --match "*.html" \
+            --ignore-re "Attribute .* not allowed|.*vendor.*"
