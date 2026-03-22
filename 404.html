@@ -8,7 +8,7 @@
   // Converts /about → /about.html, /blog → /blog.html etc.
   (function() {
     var path = window.location.pathname;
-    var pages = ['about','projects','blog','updates'];
+    var pages = ['about','projects','blog'];
     // Strip leading slash and trailing slash
     var clean = path.replace(/^\/+|\/+$/g,'');
     if (pages.indexOf(clean) !== -1) {
